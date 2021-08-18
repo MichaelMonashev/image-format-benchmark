@@ -1,4 +1,9 @@
 import timeit
+import numpy as np
+import cv2
+import sys
+import os
+import os.path
 
 s = """
 import cv2
@@ -94,15 +99,8 @@ f10 = "tf_png()"
 f11 = "pil_jpg()"
 f12 = "pil_png()"
 
-
-import numpy as np
-import cv2
-import sys
-import os
-import os.path
-
 print('Generating sample images 512x512x3 ...')
-img = (np.random.standard_normal([512, 512, 3]) * 255).astype(np.uint8)
+img = np.random.randint(0, high=255, size=(512,512,3), dtype=np.uint8)
 
 for f in ['/tmp/benchmark.jpg','/tmp/benchmark.png','/tmp/benchmark.bmp','/tmp/benchmark.tif']:
     cv2.imwrite(f, img)
@@ -111,15 +109,30 @@ try:
     cv2.imwrite('/tmp/benchmark.wepb', img)
 except:
     f5 = "skip()"
-    print('OpenCV has not Webp support.', sys.exc_info())
+    print('OpenCV has not Webp support. So skip Webp benchmarks.')
 
 try:
-    import tensorflow as tf
+    import jpeg4py
+except:
+    f6 = "skip()"
+    print('jpeg4py is not installed. So skip jpeg4py benchmarks.')
+
+try:
+    import torchvision
+except:
+    f7 = "skip()"
+    f8 = "skip()"
+    print('torchvision is not installed. So skip torchvision benchmarks.')
+
+try:
+    import tensorflow
 except:
     f9 = "skip()"
     f10 = "skip()"
+    print('tensorflow is not installed. So skip TF benchmarks.')
 
-print('Start bencmark...')
+print('Start bencmark.')
+print('Small time is better.')
 for f in [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12]:
     print(f, timeit.timeit(setup = s, stmt = f, number = 1000))
 
